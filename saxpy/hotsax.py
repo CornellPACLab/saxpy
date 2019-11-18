@@ -1,12 +1,12 @@
 """Implements HOT-SAX."""
 import numpy as np
-from saxpy.znorm import znorm
-from saxpy.sax import sax_via_window
-from saxpy.distance import euclidean
+from znorm import znorm
+from sax import sax_via_window
+from distance import euclidean
 
 
 def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
-                         paa_size=3, z_threshold=0.01):
+                         paa_size=3, z_threshold=0.01, sax_series=None, sax=False):
     """HOT-SAX-driven discords discovery."""
     discords = list()
 
@@ -16,7 +16,7 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
 
         bestDiscord = find_best_discord_hotsax(series, win_size, a_size,
                                                paa_size, z_threshold,
-                                               globalRegistry)
+                                               globalRegistry, sax_series, sax)
 
         if -1 == bestDiscord[0]:
             break
@@ -38,10 +38,16 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
 
 
 def find_best_discord_hotsax(series, win_size, a_size, paa_size,
-                             znorm_threshold, globalRegistry): # noqa: C901
+                             znorm_threshold, globalRegistry, sax_series=None, sax=False): # noqa: C901
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
+    if sax:
+        sax_none = dict()
+        for s in set(sax_series):
+            sax_none[s] = [i for i in range(len(sax_series)) if sax_series[i] == s]
+    else:
+        sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
+
 
     """[2.0] build the 'magic' array"""
     magic_array = list()
